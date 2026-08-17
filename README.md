@@ -230,6 +230,11 @@ The application then displays the comparable properties and their:
 * Distance from the target
 * Similarity score
 
+### Running the Example
+
+```bash
+python main.py
+
 ## Limitations
 
 This is a simplified comparable-property estimator.
@@ -249,6 +254,236 @@ It does not currently account for many factors that can significantly affect pro
 * Actual transaction prices versus asking prices
 
 The dataset is also synthetic, so the estimates should not be used for real purchasing, selling, financing, taxation, or professional valuation decisions.
+
+###Example Output
+
+   ╭──────────────────────────────────────╮
+   │   🏡  Barcelona Property Analyzer     │
+   │                                      │
+   │        ✦ explore the local market ✦   │
+   ╰──────────────────────────────────────╯
+
+Please enter the property details below:
+
+ City: Barcelona
+ Neighborhood: Eixample
+ Property type (apartment/penthouse/studio): apartment
+ Size (m²): 85
+ Bedrooms: 3
+ Bathrooms: 2
+ Address: Carrer de Mallorca, 200, Barcelona
+
+ Looking for similar properties...
+
+
+==========================================================
+                        RESULTS
+==========================================================
+
+Property:
+  85 m² | 3 bedrooms | 2 bathrooms
+  Eixample, Barcelona
+
+Estimated market price:
+  €455,679
+
+Estimated price per m²:
+  €5,361/m²
+
+Estimated price range:
+  €442,947 - €463,736
+
+Comparable properties used:
+  10
+
+
+==========================================================
+                  TOP COMPARABLES
+==========================================================
+
+Property:
+  84 m² | 3 bedrooms | 2 bathrooms
+
+Price:
+  €431,500
+
+Price per m²:
+  €5,137
+
+Distance:
+  0.38 km
+
+Similarity:
+  93.8%
+----------------------------------------------------------
+
+Property:
+  83 m² | 3 bedrooms | 2 bathrooms
+
+Price:
+  €453,000
+
+Price per m²:
+  €5,458
+
+Distance:
+  0.55 km
+
+Similarity:
+  91.0%
+----------------------------------------------------------
+
+Property:
+  89 m² | 3 bedrooms | 3 bathrooms
+
+Price:
+  €463,000
+
+Price per m²:
+  €5,202
+
+Distance:
+  0.31 km
+
+Similarity:
+  88.7%
+----------------------------------------------------------
+
+Property:
+  75 m² | 3 bedrooms | 2 bathrooms
+
+Price:
+  €398,500
+
+Price per m²:
+  €5,313
+
+Distance:
+  0.63 km
+
+Similarity:
+  86.5%
+----------------------------------------------------------
+
+Property:
+  93 m² | 3 bedrooms | 2 bathrooms
+
+Price:
+  €524,500
+
+Price per m²:
+  €5,640
+
+Distance:
+  0.70 km
+
+Similarity:
+  86.2%
+----------------------------------------------------------
+
+Property:
+  82 m² | 3 bedrooms | 2 bathrooms
+
+Price:
+  €429,500
+
+Price per m²:
+  €5,238
+
+Distance:
+  0.84 km
+
+Similarity:
+  86.1%
+----------------------------------------------------------
+
+Property:
+  75 m² | 3 bedrooms | 1 bathrooms
+
+Price:
+  €351,000
+
+Price per m²:
+  €4,680
+
+Distance:
+  0.32 km
+
+Similarity:
+  86.1%
+----------------------------------------------------------
+
+Property:
+  78 m² | 3 bedrooms | 2 bathrooms
+
+Price:
+  €489,000
+
+Price per m²:
+  €6,269
+
+Distance:
+  0.76 km
+
+Similarity:
+  85.8%
+----------------------------------------------------------
+
+Property:
+  82 m² | 3 bedrooms | 2 bathrooms
+
+Price:
+  €443,500
+
+Price per m²:
+  €5,409
+
+Distance:
+  0.91 km
+
+Similarity:
+  85.1%
+----------------------------------------------------------
+
+Property:
+  79 m² | 2 bedrooms | 1 bathrooms
+
+Price:
+  €430,500
+
+Price per m²:
+  €5,449
+
+Distance:
+  0.17 km
+
+Similarity:
+  83.3%
+----------------------------------------------------------
+
+==========================================================
+                        SUMMARY
+==========================================================
+
+Your property:
+
+  Size:       85 m²
+  Bedrooms:   3
+  Bathrooms:  2
+
+Based on the 10 most similar properties:
+
+  Estimated value:
+  €455,679
+
+  Estimated €/m²:
+  €5,361
+
+  Estimated range:
+  €442,947 - €463,736
+
+Note: This is an estimate based on comparable property listings,
+not an official valuation.
 
 ## Future Improvements
 
