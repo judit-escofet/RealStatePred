@@ -1,58 +1,77 @@
-# Real State Property Analyzer
+# Barcelona Property Analyzer
 
-A lightweight Python tool that estimates the market price of a property by finding similar properties from a local dataset.
+A lightweight Python command-line application that estimates the market price of a property by finding similar properties from a local dataset.
 
-The application takes basic property characteristics and an address, converts the address into geographic coordinates using OpenStreetMap Nominatim, finds nearby comparable properties, ranks them by similarity, and calculates an estimated market price based on their €/m².
+The application takes basic property characteristics and an address, converts the address into geographic coordinates using OpenStreetMap Nominatim, finds nearby comparable properties, ranks them according to similarity, and estimates the property's market price based on the €/m² of the most comparable listings.
 
-> **Note:** This project uses synthetic/mock property data. The result is an estimate based on comparable listings and is **not an official property valuation or professional appraisal**.
+> **Disclaimer:** This project uses synthetic/mock property data. The result is an estimate based on comparable listings and is **not an official property valuation or professional appraisal**.
+
+---
 
 ## Features
 
-* Interactive command-line interface
-* Address-to-coordinate geocoding using OpenStreetMap Nominatim
-* Property comparison based on:
+- Interactive command-line interface
+- Address-to-coordinate geocoding using OpenStreetMap Nominatim
+- Geographic distance calculation using latitude and longitude
+- Comparable-property search within a 2 km radius
+- Filtering by property type
+- Filtering by similar property size
+- Similarity scoring based on:
+  - Property size
+  - Geographic distance
+  - Bedrooms
+  - Bathrooms
+- Top 10 comparable-property selection
+- Median €/m² calculation
+- Estimated property value
+- Estimated price range
+- Detailed comparable-property results
 
-  * Geographic distance
-  * Property size
-  * Number of bedrooms
-  * Number of bathrooms
-  * Property type
-* Haversine distance calculation
-* Comparable-property similarity scoring
-* Estimated price per square meter
-* Estimated property price
-* Estimated price range
-* Display of the 10 most similar properties
+---
 
 ## How It Works
 
-The program follows this process:
+The application follows this process:
 
 ```text
 User enters property information
-            ↓
-Address is geocoded
-            ↓
-Latitude + longitude obtained
-            ↓
+            |
+            v
+Address is sent to Nominatim
+            |
+            v
+Latitude + Longitude obtained
+            |
+            v
 CSV property dataset loaded
-            ↓
+            |
+            v
+Distance to every property calculated
+            |
+            v
 Properties within 2 km selected
-            ↓
+            |
+            v
 Properties filtered by type and size
-            ↓
+            |
+            v
 Similarity score calculated
-            ↓
+            |
+            v
 Top 10 comparable properties selected
-            ↓
+            |
+            v
 Median €/m² calculated
-            ↓
+            |
+            v
 Estimated property price calculated
-```
+````
 
-## Similarity Calculation
+---
 
-Each comparable property receives a similarity score based on four factors:
+## Similarity Algorithm
+
+Each comparable property receives a similarity score based on four factors.
 
 | Factor              | Weight |
 | ------------------- | -----: |
@@ -64,24 +83,28 @@ Each comparable property receives a similarity score based on four factors:
 The final score is calculated as:
 
 ```text
-Similarity =
+Similarity Score =
     Size Score × 0.35
+  + Distance Score × 0.30
   + Bedroom Score × 0.20
   + Bathroom Score × 0.15
-  + Distance Score × 0.30
 ```
 
-The 10 highest-scoring properties are used for the final estimate.
+A higher score means that the property is more similar to the user's property.
+
+The application then selects the **10 highest-scoring properties** as the final comparable properties.
+
+---
 
 ## Price Estimation
 
-For every property in the dataset, the application calculates:
+For every property in the dataset, the application calculates its price per square meter:
 
 ```text
 Price per m² = Property Price / Property Size
 ```
 
-The estimated market €/m² is the **median €/m² of the top comparable properties**.
+The estimated market price per square meter is calculated using the **median €/m² of the top 10 comparable properties**.
 
 The estimated property value is then:
 
@@ -90,18 +113,78 @@ Estimated Price =
 Estimated €/m² × Target Property Size
 ```
 
-The application also calculates an estimated range using the 25th and 75th percentiles of the comparable properties' €/m².
+### Price Range
+
+The application also calculates a price range using the 25th and 75th percentiles of the comparable properties' €/m².
+
+```text
+Lower Estimate =
+25th Percentile €/m² × Target Property Size
+
+Upper Estimate =
+75th Percentile €/m² × Target Property Size
+```
+
+Using the median and percentiles makes the estimate less sensitive to unusually cheap or expensive individual listings.
+
+---
+
+## Geocoding
+
+Instead of asking the user to provide latitude and longitude manually, the application accepts an address:
+
+```text
+Address: Carrer de Mallorca, 200, Barcelona
+```
+
+The address is combined with the neighborhood and city and sent to the **OpenStreetMap Nominatim** geocoding service.
+
+Nominatim returns coordinates such as:
+
+```text
+Latitude: 41.xxxxx
+Longitude: 2.xxxxx
+```
+
+These coordinates are then used to calculate the distance between the target property and the properties in the dataset.
+
+---
+
+## Geographic Distance
+
+The application uses the **Haversine formula** to calculate the approximate distance between two points on Earth.
+
+For example:
+
+```text
+Target property
+       |
+       | 0.38 km
+       |
+Comparable property
+```
+
+Properties closer to the target receive a higher distance score.
+
+The current application uses a maximum search radius of:
+
+```text
+2 km
+```
+
+---
 
 ## Dataset
 
-The current project uses:
+The application currently uses:
 
 ```text
 data/barcelona_properties_mock.csv
 ```
 
-The dataset contains synthetic Barcelona property listings with information such as:
+The dataset contains synthetic property listings with fields including:
 
+* ID
 * City
 * Neighborhood
 * Price
@@ -114,30 +197,59 @@ The dataset contains synthetic Barcelona property listings with information such
 * Floor
 * Condition
 
-The data is intended for development and demonstration purposes and should not be interpreted as real market data.
+Example:
+
+```csv
+id,city,neighborhood,price,sqm,bedrooms,bathrooms,property_type,latitude,longitude
+1,Barcelona,Eixample,431500,84,3,2,apartment,41.394,2.162
+2,Barcelona,Eixample,453000,83,3,2,apartment,41.395,2.158
+```
+
+### Important
+
+The dataset is **synthetic/mock data created for this project**.
+
+It is not scraped from a real estate website and should not be interpreted as real Barcelona property-market data.
+
+---
+
+## Technologies
+
+The project uses:
+
+* **Python**
+* **Pandas** — data loading, filtering, calculations, and analysis
+* **Requests** — HTTP requests to the geocoding service
+* **OpenStreetMap Nominatim** — address geocoding
+* **Math** — geographic distance calculations
+* **CSV** — property dataset storage
+
+---
 
 ## Requirements
 
 Python 3.9+ is recommended.
 
-Install the required packages:
+Install the dependencies:
 
 ```bash
 pip install pandas requests
 ```
 
-Or create a `requirements.txt` file containing:
+Alternatively, create a `requirements.txt` file:
 
 ```text
 pandas
 requests
 ```
 
-Then install:
+Then run:
 
 ```bash
 pip install -r requirements.txt
 ```
+
+---
 
 ## Project Structure
 
@@ -152,15 +264,17 @@ barcelona-property-analyzer/
     └── barcelona_properties_mock.csv
 ```
 
+---
+
 ## Running the Application
 
-From the project directory:
+From the project directory, run:
 
 ```bash
 python main.py
 ```
 
-The program will ask for:
+The application will ask for:
 
 ```text
 City
@@ -177,86 +291,36 @@ For example:
 ```text
 City: Barcelona
 Neighborhood: Eixample
-Property type: apartment
+Property type (apartment/penthouse/studio): apartment
 Size (m²): 85
 Bedrooms: 3
 Bathrooms: 2
-Address: Carrer de Mallorca 200
+Address: Carrer de Mallorca, 200, Barcelona
 ```
 
-The address is combined with the neighborhood and city and sent to the OpenStreetMap Nominatim geocoding service.
+---
 
-## Geocoding
+# Example
 
-The application uses **OpenStreetMap Nominatim** to convert the supplied address into latitude and longitude.
+The following example estimates the market price of an 85 m² apartment in Barcelona's Eixample neighborhood.
 
-The coordinates are then used to calculate the distance between the target property and every property in the dataset.
-
-The project identifies nearby properties using the Haversine formula, which calculates the approximate distance between two points on Earth's surface.
-
-A maximum radius of **2 km** is currently used.
-
-## Example Output
+### Input
 
 ```text
-==========================================================
-                        RESULTS
-==========================================================
-
-Property:
-  85 m² | 3 bedrooms | 2 bathrooms
-  Eixample, Barcelona
-
-Estimated market price:
-  €450,000
-
-Estimated price per m²:
-  €5,294/m²
-
-Estimated price range:
-  €430,000 - €470,000
-
-Comparable properties used:
-  10
+City: Barcelona
+Neighborhood: Eixample
+Property type (apartment/penthouse/studio): apartment
+Size (m²): 85
+Bedrooms: 3
+Bathrooms: 2
+Address: Carrer de Mallorca, 200, Barcelona
 ```
 
-The application then displays the comparable properties and their:
+The application geocodes the address, finds nearby comparable properties, ranks them by similarity, and calculates an estimated market price.
 
-* Size
-* Bedrooms
-* Bathrooms
-* Price
-* €/m²
-* Distance from the target
-* Similarity score
+### Example Output
 
-### Running the Example
-
-```bash
-python main.py
-
-## Limitations
-
-This is a simplified comparable-property estimator.
-
-It does not currently account for many factors that can significantly affect property prices, such as:
-
-* Exact street/location quality
-* Views
-* Terrace or balcony
-* Parking
-* Elevator
-* Building age
-* Renovation quality
-* Energy efficiency
-* Natural light
-* Historical market trends
-* Actual transaction prices versus asking prices
-
-The dataset is also synthetic, so the estimates should not be used for real purchasing, selling, financing, taxation, or professional valuation decisions.
-
-###Example Output
-
+```text
    ╭──────────────────────────────────────╮
    │   🏡  Barcelona Property Analyzer     │
    │                                      │
@@ -317,6 +381,7 @@ Similarity:
   93.8%
 ----------------------------------------------------------
 
+
 Property:
   83 m² | 3 bedrooms | 2 bathrooms
 
@@ -332,6 +397,7 @@ Distance:
 Similarity:
   91.0%
 ----------------------------------------------------------
+
 
 Property:
   89 m² | 3 bedrooms | 3 bathrooms
@@ -349,6 +415,7 @@ Similarity:
   88.7%
 ----------------------------------------------------------
 
+
 Property:
   75 m² | 3 bedrooms | 2 bathrooms
 
@@ -364,6 +431,7 @@ Distance:
 Similarity:
   86.5%
 ----------------------------------------------------------
+
 
 Property:
   93 m² | 3 bedrooms | 2 bathrooms
@@ -381,6 +449,7 @@ Similarity:
   86.2%
 ----------------------------------------------------------
 
+
 Property:
   82 m² | 3 bedrooms | 2 bathrooms
 
@@ -396,6 +465,7 @@ Distance:
 Similarity:
   86.1%
 ----------------------------------------------------------
+
 
 Property:
   75 m² | 3 bedrooms | 1 bathrooms
@@ -413,6 +483,7 @@ Similarity:
   86.1%
 ----------------------------------------------------------
 
+
 Property:
   78 m² | 3 bedrooms | 2 bathrooms
 
@@ -429,6 +500,7 @@ Similarity:
   85.8%
 ----------------------------------------------------------
 
+
 Property:
   82 m² | 3 bedrooms | 2 bathrooms
 
@@ -444,6 +516,7 @@ Distance:
 Similarity:
   85.1%
 ----------------------------------------------------------
+
 
 Property:
   79 m² | 2 bedrooms | 1 bathrooms
@@ -484,25 +557,124 @@ Based on the 10 most similar properties:
 
 Note: This is an estimate based on comparable property listings,
 not an official valuation.
+```
+
+> **Note:** The example above uses synthetic property data and is intended only to demonstrate the application's functionality. The prices shown should not be interpreted as actual Barcelona market prices.
+
+---
+
+## Limitations
+
+This is a simplified comparable-property estimator rather than a professional valuation system.
+
+The current version does not account for many factors that can affect property prices, including:
+
+* Exact street characteristics
+* Views
+* Natural light
+* Balcony or terrace
+* Parking
+* Elevator
+* Building age
+* Renovation quality
+* Energy efficiency
+* Property orientation
+* Historical price trends
+* Market conditions
+* Actual transaction prices
+* Differences between asking prices and final sale prices
+
+The geographic search is also relatively simple, using a fixed 2 km radius.
+
+Most importantly, the current dataset is synthetic.
+
+---
 
 ## Future Improvements
 
-Possible next steps include:
+The project could be expanded in several directions.
 
-1. Replace the mock CSV with a regularly updated and legally obtained property dataset.
-2. Improve the comparable-property algorithm.
-3. Add additional property characteristics.
-4. Add an interactive map.
-5. Build a Streamlit web interface.
-6. Add historical market-price analysis.
-7. Compare different neighborhoods.
-8. Experiment with machine-learning price prediction.
-9. Add an AI-generated explanation of the estimate.
+### Data
+
+* Replace the mock CSV with a regularly updated, legally obtained dataset
+* Add more neighborhoods
+* Add more property characteristics
+* Include historical listings
+* Distinguish asking prices from transaction prices
+
+### Geospatial Analysis
+
+* Add an interactive map
+* Improve location weighting
+* Consider walking distance
+* Analyze proximity to public transportation
+* Consider schools, parks, shops, and other amenities
+
+### User Interface
+
+* Build a Streamlit web application
+* Add interactive filters
+* Display comparable properties on a map
+* Add charts showing local €/m²
+
+### Machine Learning
+
+A future version could compare the current similarity-based approach with a machine-learning model.
+
+Possible models could include:
+
+* Linear Regression
+* Random Forest
+* Gradient Boosting
+
+The machine-learning model could use features such as:
+
+```text
+Size
+Bedrooms
+Bathrooms
+Latitude
+Longitude
+Neighborhood
+Property Type
+Floor
+Condition
+```
+
+The current rule-based approach is intentionally simple and explainable, making it a useful baseline before introducing machine learning.
+
+### AI
+
+An AI layer could eventually generate a natural-language explanation of the estimate, for example:
+
+```text
+The estimated market price is approximately €455,679.
+The estimate is based on 10 comparable properties within 2 km.
+Most comparable properties are similar in size and bedroom count,
+with prices ranging from approximately €4,680 to €6,269 per m².
+```
+
+The AI should explain the calculated results rather than independently inventing a property valuation.
+
+---
 
 ## Disclaimer
 
-This project is an educational software project designed to demonstrate data analysis, geospatial calculations, and comparable-property estimation.
+This project is an educational software project demonstrating:
 
-The output is an **estimated market price**, not an official valuation, appraisal, or professional *tasación*.
+* Data analysis
+* Pandas
+* Geospatial calculations
+* Address geocoding
+* Comparable-property analysis
+* Basic statistical estimation
 
-The current dataset consists of synthetic data and should not be treated as real Barcelona property-market information.
+The output is an **estimated market price**, not an official property valuation, appraisal, *tasación*, or professional real-estate advice.
+
+The current dataset consists of synthetic data and should not be used for actual purchasing, selling, financing, taxation, or investment decisions.
+
+---
+
+## Author
+
+Built as a personal Python/data-analysis project exploring how geospatial data and comparable-property analysis can be used to create a simple real-estate valuation tool.
